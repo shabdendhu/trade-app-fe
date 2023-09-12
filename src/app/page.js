@@ -1,95 +1,82 @@
-import Image from 'next/image'
-import styles from './page.module.css'
+"use client";
+import React, { useEffect, useRef } from "react";
 
-export default function Home() {
+let tvScriptLoadingPromise;
+
+export default function TradingViewWidget() {
+  const onLoadScriptRef = useRef();
+
+  useEffect(() => {
+    onLoadScriptRef.current = createWidget;
+
+    if (!tvScriptLoadingPromise) {
+      tvScriptLoadingPromise = new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.id = "tradingview-widget-loading-script";
+        script.src = "https://s3.tradingview.com/tv.js";
+        script.type = "text/javascript";
+        script.onload = resolve;
+
+        document.head.appendChild(script);
+      });
+    }
+
+    tvScriptLoadingPromise.then(
+      () => onLoadScriptRef.current && onLoadScriptRef.current()
+    );
+
+    return () => (onLoadScriptRef.current = null);
+
+    function createWidget() {
+      if (
+        document.getElementById("technical-analysis-chart-demo") &&
+        "TradingView" in window
+      ) {
+        new window.TradingView.widget({
+          container_id: "technical-analysis-chart-demo",
+          width: "100%",
+          height: "100vh",
+          autosize: true,
+          symbol: "AAPL",
+          interval: "D",
+          timezone: "exchange",
+          theme: "light",
+          style: "1",
+          withdateranges: true,
+          hide_side_toolbar: false,
+          allow_symbol_change: true,
+          save_image: false,
+          studies: [
+            "ROC@tv-basicstudies",
+            "StochasticRSI@tv-basicstudies",
+            "MASimple@tv-basicstudies",
+          ],
+          show_popup_button: true,
+          popup_width: "1000",
+          popup_height: "650",
+          locale: "en",
+        });
+      }
+    }
+  }, []);
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.js</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
+    <div className="tradingview-widget-container">
+      <div
+        id="technical-analysis-chart-demo"
+        style={{
+          height: "100vh",
+        }}
+      />
+      <div className="tradingview-widget-copyright">
         <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
+          href="https://www.tradingview.com/"
+          rel="noopener nofollow"
           target="_blank"
-          rel="noopener noreferrer"
         >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
+          <span className="blue-text">Track all markets on TradingView</span>
         </a>
       </div>
-    </main>
-  )
+    </div>
+  );
 }
