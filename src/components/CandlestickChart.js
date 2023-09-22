@@ -1,466 +1,267 @@
-// import React, { Component } from "react";
+import React from "react";
+import PropTypes from "prop-types";
 
-// class CandlestickChart extends Component {
-//   constructor(props) {
-//     super(props);
-//     this.canvasRef = React.createRef();
-//     this.state = {
-//       scale: 1, // Initial scale
-//     };
-//     this.lastScale = 1; // To store the previous scale value
-//   }
+import { format } from "d3-format";
+import { timeFormat } from "d3-time-format";
 
-//   componentDidMount() {
-//     this.drawCandlestickChart();
-//     this.addEventListeners();
-//   }
+import { ChartCanvas, Chart } from "react-stockcharts";
+import {
+  BarSeries,
+  AreaSeries,
+  CandlestickSeries,
+  LineSeries,
+  MACDSeries,
+} from "react-stockcharts/lib/series";
+import { XAxis, YAxis } from "react-stockcharts/lib/axes";
+import {
+  CrossHairCursor,
+  EdgeIndicator,
+  CurrentCoordinate,
+  MouseCoordinateX,
+  MouseCoordinateY,
+} from "react-stockcharts/lib/coordinates";
 
-//   addEventListeners() {
-//     const canvas = this.canvasRef.current;
-//     canvas.addEventListener("wheel", this.handleWheel);
-//     canvas.addEventListener("touchstart", this.handleTouchStart);
-//     canvas.addEventListener("touchmove", this.handleTouchMove);
-//     window.addEventListener("scroll", this.handleScroll);
-//   }
+import { discontinuousTimeScaleProvider } from "react-stockcharts/lib/scale";
+import {
+  OHLCTooltip,
+  MovingAverageTooltip,
+  MACDTooltip,
+} from "react-stockcharts/lib/tooltip";
+import { ema, macd, sma } from "react-stockcharts/lib/indicator";
+import { fitWidth } from "react-stockcharts/lib/helper";
 
-//   componentWillUnmount() {
-//     const canvas = this.canvasRef.current;
-//     canvas.removeEventListener("wheel", this.handleWheel);
-//     canvas.removeEventListener("touchstart", this.handleTouchStart);
-//     canvas.removeEventListener("touchmove", this.handleTouchMove);
-//     window.removeEventListener("scroll", this.handleScroll);
-//   }
-//   handleScroll = (e) => {
-//     // Calculate the new scale based on the mouse wheel direction
-//     const delta = e.deltaY > 0 ? 0.9 : 1.1;
-//     const newScale = this.state.scale * delta;
+const macdAppearance = {
+  stroke: {
+    macd: "#FF0000",
+    signal: "#00F300",
+  },
+  fill: {
+    divergence: "#4682B4",
+  },
+};
 
-//     // Ensure the scale is within a certain range
-//     // if (newScale >= 1 && newScale <= 2) {
-//     this.setState({ scale: newScale });
-//     // When scrolling, clear and redraw the entire chart
-//     this.drawCandlestickChart();
-//   };
-//   handleWheel = (e) => {
-//     e.preventDefault();
+const mouseEdgeAppearance = {
+  textFill: "#542605",
+  stroke: "#05233B",
+  strokeOpacity: 1,
+  strokeWidth: 3,
+  arrowWidth: 5,
+  fill: "#BCDEFA",
+};
 
-//     // Calculate the new scale based on the mouse wheel direction
-//     const delta = e.deltaY > 0 ? 0.9 : 1.1;
-//     const newScale = this.state.scale * delta;
-//     console.log({ newScale });
-
-//     // Ensure the scale is within a certain range
-//     // if (newScale >= 1 && newScale <= 2) {
-//     this.setState({ scale: newScale });
-//     this.drawCandlestickChart(newScale);
-//     // }
-//   };
-
-//   handleTouchStart = (e) => {
-//     // Store the initial touch positions for zoom calculation
-//     if (e.touches.length === 2) {
-//       this.touchStartDistance = Math.hypot(
-//         e.touches[0].clientX - e.touches[1].clientX,
-//         e.touches[0].clientY - e.touches[1].clientY
-//       );
-//     }
-//   };
-
-//   handleTouchMove = (e) => {
-//     // Calculate the zoom factor based on touch gestures
-//     if (e.touches.length === 2) {
-//       const touchDistance = Math.hypot(
-//         e.touches[0].clientX - e.touches[1].clientX,
-//         e.touches[0].clientY - e.touches[1].clientY
-//       );
-
-//       const newScale =
-//         (this.state.scale * touchDistance) / this.touchStartDistance;
-
-//       // Ensure the scale is within a certain range
-//       if (newScale >= 1 && newScale <= 2) {
-//         this.setState({ scale: newScale });
-//         this.drawCandlestickChart(newScale);
-//       }
-//     }
-//   };
-
-//   // drawCandlestickChart(scale) {
-//   //   const canvas = this.canvasRef.current;
-//   //   const ctx = canvas.getContext("2d");
-//   //   const ohlcData =
-//   //     this.props.data.feeds["NSE_INDEX|Nifty Bank"].ff.indexFF.marketOHLC.ohlc;
-
-//   //   // Define chart dimensions and padding
-//   //   const chartWidth = canvas.width - 40;
-//   //   const chartHeight = canvas.height - 40;
-//   //   const padding = 20;
-
-//   //   // Find the min and max values for scaling
-//   //   const minPrice = Math.min(...ohlcData.map((item) => item.low));
-//   //   const maxPrice = Math.max(...ohlcData.map((item) => item.high));
-
-//   //   const priceRange = maxPrice - minPrice;
-
-//   //   // Calculate the candle width based on the number of data points
-//   //   const candleWidth = chartWidth / ohlcData.length;
-
-//   //   // Clear the canvas
-//   //   ctx.clearRect(0, 0, canvas.width, canvas.height);
-//   //   ctx.fillStyle = "white";
-//   //   ctx.fillRect(0, 0, canvas.width, canvas.height);
-//   //   // Draw grid lines
-//   //   ctx.strokeStyle = "#ccc"; // Grid line color
-//   //   ctx.lineWidth = 0.5;
-
-//   //   // Horizontal grid lines
-//   //   for (let i = 1; i < 5; i++) {
-//   //     const y = (chartHeight / 5) * i + padding;
-//   //     ctx.beginPath();
-//   //     ctx.moveTo(padding, y);
-//   //     ctx.lineTo(chartWidth + padding, y);
-//   //     ctx.stroke();
-//   //   }
-
-//   //   // Vertical grid lines
-//   //   for (let i = 1; i < ohlcData.length; i++) {
-//   //     const x = i * candleWidth + padding;
-//   //     ctx.beginPath();
-//   //     ctx.moveTo(x, padding);
-//   //     ctx.lineTo(x, chartHeight + padding);
-//   //     ctx.stroke();
-//   //   }
-
-//   //   // Draw candlesticks
-//   //   ohlcData.forEach((item, index) => {
-//   //     const x = index * candleWidth + padding;
-//   //     const yHigh =
-//   //       chartHeight -
-//   //       ((item.high - minPrice) / priceRange) * chartHeight +
-//   //       padding;
-//   //     const yLow =
-//   //       chartHeight -
-//   //       ((item.low - minPrice) / priceRange) * chartHeight +
-//   //       padding;
-//   //     const yOpen =
-//   //       chartHeight -
-//   //       ((item.open - minPrice) / priceRange) * chartHeight +
-//   //       padding;
-//   //     const yClose =
-//   //       chartHeight -
-//   //       ((item.close - minPrice) / priceRange) * chartHeight +
-//   //       padding;
-//   //     const scaledCandleWidth = candleWidth * scale;
-
-//   //     // Draw candlestick body
-//   //     ctx.fillStyle = item.open > item.close ? "red" : "green";
-//   //     ctx.fillRect(
-//   //       x - scaledCandleWidth / 2,
-//   //       yOpen,
-//   //       scaledCandleWidth,
-//   //       yClose - yOpen
-//   //     );
-
-//   //     // Draw candlestick wicks (shadows)
-//   //     ctx.strokeStyle = "transparent";
-//   //     ctx.beginPath();
-//   //     ctx.moveTo(x, yHigh);
-//   //     ctx.lineTo(x, yOpen);
-//   //     ctx.moveTo(x, yClose);
-//   //     ctx.lineTo(x, yLow);
-//   //     ctx.stroke();
-//   //     ctx.setTransform(scale, 0, 0, scale, 0, 0);
-//   //   });
-//   // }
-//   drawCandlestickChart(scale) {
-//     const canvas = this.canvasRef.current;
-//     const ctx = canvas.getContext("2d");
-//     const ohlcData =
-//       this.props.data.feeds["NSE_INDEX|Nifty Bank"].ff.indexFF.marketOHLC.ohlc;
-
-//     // Define chart dimensions and padding
-//     const chartWidth = canvas.width - 40;
-//     const chartHeight = canvas.height - 40;
-//     const padding = 20;
-
-//     // Find the min and max values for scaling
-//     const minPrice = Math.min(...ohlcData.map((item) => item.low));
-//     const maxPrice = Math.max(...ohlcData.map((item) => item.high));
-
-//     const priceRange = maxPrice - minPrice;
-
-//     // Calculate the candle width based on the number of data points
-//     const candleWidth = chartWidth / ohlcData.length;
-
-//     // Clear the canvas
-//     ctx.clearRect(0, 0, canvas.width, canvas.height);
-//     ctx.fillStyle = "white";
-//     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-//     // Apply the scale transformation only once before drawing the chart
-//     ctx.setTransform(scale, 0, 0, scale, 0, 0);
-
-//     // Draw grid lines
-//     ctx.strokeStyle = "#ccc"; // Grid line color
-//     ctx.lineWidth = 0.5;
-
-//     // Horizontal grid lines
-//     for (let i = 1; i < 5; i++) {
-//       const y = (chartHeight / 5) * i + padding;
-//       ctx.beginPath();
-//       ctx.moveTo(padding, y);
-//       ctx.lineTo(chartWidth + padding, y);
-//       ctx.stroke();
-//     }
-
-//     // Vertical grid lines
-//     for (let i = 1; i < ohlcData.length; i++) {
-//       const x = i * candleWidth + padding;
-//       ctx.beginPath();
-//       ctx.moveTo(x, padding);
-//       ctx.lineTo(x, chartHeight + padding);
-//       ctx.stroke();
-//     }
-
-//     // Draw candlesticks
-//     ohlcData.forEach((item, index) => {
-//       const x = index * candleWidth + padding;
-//       const yHigh =
-//         chartHeight -
-//         ((item.high - minPrice) / priceRange) * chartHeight +
-//         padding;
-//       const yLow =
-//         chartHeight -
-//         ((item.low - minPrice) / priceRange) * chartHeight +
-//         padding;
-//       const yOpen =
-//         chartHeight -
-//         ((item.open - minPrice) / priceRange) * chartHeight +
-//         padding;
-//       const yClose =
-//         chartHeight -
-//         ((item.close - minPrice) / priceRange) * chartHeight +
-//         padding;
-//       const scaledCandleWidth = candleWidth * scale;
-
-//       // Draw candlestick body
-//       ctx.fillStyle = item.open > item.close ? "red" : "green";
-//       ctx.fillRect(
-//         x - scaledCandleWidth / 2,
-//         yOpen,
-//         scaledCandleWidth,
-//         yClose - yOpen
-//       );
-
-//       // Draw candlestick wicks (shadows)
-//       ctx.strokeStyle = "transparent";
-//       ctx.beginPath();
-//       ctx.moveTo(x, yHigh);
-//       ctx.lineTo(x, yOpen);
-//       ctx.moveTo(x, yClose);
-//       ctx.lineTo(x, yLow);
-//       ctx.stroke();
-//     });
-//   }
-
-//   render() {
-//     return (
-//       <canvas
-//         ref={this.canvasRef}
-//         width={2000} // Set the canvas width
-//         height={1000} // Set the canvas height
-//         style={{ border: "1px solid white" }}
-//       />
-//     );
-//   }
-// }
-
-// export default CandlestickChart;
-import React, { Component } from "react";
-
-class CandlestickChart extends Component {
-  constructor(props) {
-    super(props);
-    this.canvasRef = React.createRef();
-    this.state = {
-      scale: 1, // Initial scale
-    };
-    this.lastScale = 1; // To store the previous scale value
-  }
-
-  componentDidMount() {
-    this.drawCandlestickChart();
-    this.addEventListeners();
-  }
-
-  addEventListeners() {
-    const canvas = this.canvasRef.current;
-    canvas.addEventListener("wheel", this.handleWheel);
-    canvas.addEventListener("touchstart", this.handleTouchStart);
-    canvas.addEventListener("touchmove", this.handleTouchMove);
-    window.addEventListener("scroll", this.handleScroll);
-  }
-
-  componentWillUnmount() {
-    const canvas = this.canvasRef.current;
-    canvas.removeEventListener("wheel", this.handleWheel);
-    canvas.removeEventListener("touchstart", this.handleTouchStart);
-    canvas.removeEventListener("touchmove", this.handleTouchMove);
-    window.removeEventListener("scroll", this.handleScroll);
-  }
-
-  handleScroll = (e) => {
-    e.preventDefault();
-
-    // Calculate the new scale based on the mouse wheel direction
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-    const newScale = this.state.scale * delta;
-
-    // Ensure the scale is within a certain range
-    // You can adjust the range as needed
-    if (newScale >= 0.5 && newScale <= 2) {
-      this.setState({ scale: newScale });
-      this.drawCandlestickChart(newScale);
-    }
-  };
-
-  handleWheel = (e) => {
-    e.preventDefault();
-
-    // Calculate the new scale based on the mouse wheel direction
-    const delta = e.deltaY > 0 ? 0.9 : 1.1;
-
-    // Ensure the scale is within a certain range
-    // You can adjust the range as needed
-    const newScale = this.state.scale * delta;
-
-    // if (newScale >= 0.5 && newScale <= 2) {
-    this.setState({ scale: newScale });
-    this.drawCandlestickChart(newScale);
-    // }
-  };
-
-  handleTouchStart = (e) => {
-    // Store the initial touch positions for zoom calculation
-    if (e.touches.length === 2) {
-      this.touchStartDistance = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-    }
-  };
-
-  handleTouchMove = (e) => {
-    // Calculate the zoom factor based on touch gestures
-    if (e.touches.length === 2) {
-      const touchDistance = Math.hypot(
-        e.touches[0].clientX - e.touches[1].clientX,
-        e.touches[0].clientY - e.touches[1].clientY
-      );
-
-      const newScale =
-        (this.state.scale * touchDistance) / this.touchStartDistance;
-
-      // Ensure the scale is within a certain range
-      // You can adjust the range as needed
-      if (newScale >= 0.5 && newScale <= 2) {
-        this.setState({ scale: newScale });
-        this.drawCandlestickChart(newScale);
-      }
-    }
-  };
-
-  drawCandlestickChart(scale) {
-    const canvas = this.canvasRef.current;
-    const ctx = canvas.getContext("2d");
-    const ohlcData =
-      this.props.data.feeds["NSE_INDEX|Nifty Bank"].ff.indexFF.marketOHLC.ohlc;
-
-    // Define chart dimensions and padding
-    const chartWidth = canvas.width - 40;
-    const chartHeight = canvas.height - 40;
-    const padding = 20;
-
-    // Find the min and max values for scaling on the x-axis only
-    const minPrice = Math.min(...ohlcData.map((item) => item.low));
-    const maxPrice = Math.max(...ohlcData.map((item) => item.high));
-    const priceRange = maxPrice - minPrice;
-
-    // Calculate the candle width based on the number of data points
-    const candleWidth = (chartWidth / ohlcData.length) * scale;
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Apply the scale transformation for the x-axis only
-    ctx.setTransform(scale, 0, 0, 1, 0, 0);
-
-    // Draw grid lines on the x-axis with the inverse of the x-axis scale
-    ctx.strokeStyle = "#ccc"; // Grid line color
-    ctx.lineWidth = 0.5;
-
-    // Horizontal grid lines
-    for (let i = 1; i < 5; i++) {
-      const y = (chartHeight / 5) * i + padding;
-      ctx.beginPath();
-      ctx.moveTo(padding / scale, y);
-      ctx.lineTo((chartWidth + padding) / scale, y);
-      ctx.stroke();
-    }
-
-    // Draw candlesticks (scaled as before)
-    ohlcData.forEach((item, index) => {
-      const x = index * candleWidth + padding;
-      const yHigh =
-        chartHeight -
-        ((item.high - minPrice) / priceRange) * chartHeight +
-        padding;
-      const yLow =
-        chartHeight -
-        ((item.low - minPrice) / priceRange) * chartHeight +
-        padding;
-      const yOpen =
-        chartHeight -
-        ((item.open - minPrice) / priceRange) * chartHeight +
-        padding;
-      const yClose =
-        chartHeight -
-        ((item.close - minPrice) / priceRange) * chartHeight +
-        padding;
-      const scaledCandleWidth = candleWidth;
-
-      // Draw candlestick body
-      ctx.fillStyle = item.open > item.close ? "red" : "green";
-      ctx.fillRect(
-        (x - scaledCandleWidth / 2) / scale,
-        yOpen,
-        scaledCandleWidth,
-        yClose - yOpen
-      );
-
-      // Draw candlestick wicks (shadows)
-      ctx.strokeStyle = "transparent";
-      ctx.beginPath();
-      ctx.moveTo(x / scale, yHigh);
-      ctx.lineTo(x / scale, yOpen);
-      ctx.moveTo(x / scale, yClose);
-      ctx.lineTo(x / scale, yLow);
-      ctx.stroke();
-    });
-  }
-
+class CandleStickChartWithMACDIndicator extends React.Component {
   render() {
+    const { type, data: initialData, width, ratio } = this.props;
+    const ema26 = ema()
+      .id(0)
+      .options({ windowSize: 26 })
+      .merge((d, c) => {
+        d.ema26 = c;
+      })
+      .accessor((d) => d.ema26);
+
+    const ema12 = ema()
+      .id(1)
+      .options({ windowSize: 12 })
+      .merge((d, c) => {
+        d.ema12 = c;
+      })
+      .accessor((d) => d.ema12);
+
+    const macdCalculator = macd()
+      .options({
+        fast: 12,
+        slow: 26,
+        signal: 9,
+      })
+      .merge((d, c) => {
+        d.macd = c;
+      })
+      .accessor((d) => d.macd);
+
+    const smaVolume50 = sma()
+      .id(3)
+      .options({
+        windowSize: 50,
+        sourcePath: "volume",
+      })
+      .merge((d, c) => {
+        d.smaVolume50 = c;
+      })
+      .accessor((d) => d.smaVolume50);
+
+    const calculatedData = smaVolume50(
+      macdCalculator(ema12(ema26(initialData)))
+    );
+    const xScaleProvider = discontinuousTimeScaleProvider.inputDateAccessor(
+      (d) => d.date
+    );
+    const { data, xScale, xAccessor, displayXAccessor } =
+      xScaleProvider(calculatedData);
+
     return (
-      <canvas
-        ref={this.canvasRef}
-        width={1000} // Set the canvas width
-        height={500} // Set the canvas height
-        style={{ border: "1px solid white" }}
-      />
+      <ChartCanvas
+        height={600}
+        width={width}
+        ratio={ratio}
+        margin={{ left: 70, right: 70, top: 20, bottom: 30 }}
+        type={type}
+        seriesName="MSFT"
+        data={data}
+        xScale={xScale}
+        xAccessor={xAccessor}
+        displayXAccessor={displayXAccessor}
+      >
+        <Chart
+          id={1}
+          height={400}
+          yExtents={[
+            (d) => [d.high, d.low],
+            ema26.accessor(),
+            ema12.accessor(),
+          ]}
+          padding={{ top: 10, bottom: 20 }}
+        >
+          <XAxis
+            axisAt="bottom"
+            orient="bottom"
+            showTicks={false}
+            outerTickSize={0}
+          />
+          <YAxis axisAt="right" orient="right" ticks={5} />
+
+          <MouseCoordinateY
+            at="right"
+            orient="right"
+            displayFormat={format(".2f")}
+            {...mouseEdgeAppearance}
+          />
+
+          <CandlestickSeries />
+          <LineSeries yAccessor={ema26.accessor()} stroke={ema26.stroke()} />
+          <LineSeries yAccessor={ema12.accessor()} stroke={ema12.stroke()} />
+
+          <CurrentCoordinate
+            yAccessor={ema26.accessor()}
+            fill={ema26.stroke()}
+          />
+          <CurrentCoordinate
+            yAccessor={ema12.accessor()}
+            fill={ema12.stroke()}
+          />
+
+          <EdgeIndicator
+            itemType="last"
+            orient="right"
+            edgeAt="right"
+            yAccessor={(d) => d.close}
+            fill={(d) => (d.close > d.open ? "#A2F5BF" : "#F9ACAA")}
+            stroke={(d) => (d.close > d.open ? "#0B4228" : "#6A1B19")}
+            textFill={(d) => (d.close > d.open ? "#0B4228" : "#420806")}
+            strokeOpacity={1}
+            strokeWidth={3}
+            arrowWidth={2}
+          />
+
+          <OHLCTooltip origin={[-40, 0]} />
+          <MovingAverageTooltip
+            onClick={(e) => console.log(e)}
+            origin={[-38, 15]}
+            options={[
+              {
+                yAccessor: ema26.accessor(),
+                type: "EMA",
+                stroke: ema26.stroke(),
+                windowSize: ema26.options().windowSize,
+              },
+              {
+                yAccessor: ema12.accessor(),
+                type: "EMA",
+                stroke: ema12.stroke(),
+                windowSize: ema12.options().windowSize,
+              },
+            ]}
+          />
+        </Chart>
+        <Chart
+          id={2}
+          height={150}
+          yExtents={[(d) => d.volume, smaVolume50.accessor()]}
+          origin={(w, h) => [0, h - 300]}
+        >
+          <YAxis
+            axisAt="left"
+            orient="left"
+            ticks={5}
+            tickFormat={format(".2s")}
+          />
+
+          <MouseCoordinateY
+            at="left"
+            orient="left"
+            displayFormat={format(".4s")}
+            {...mouseEdgeAppearance}
+          />
+
+          <BarSeries
+            yAccessor={(d) => d.volume}
+            fill={(d) => (d.close > d.open ? "#6BA583" : "#FF0000")}
+          />
+          <AreaSeries
+            yAccessor={smaVolume50.accessor()}
+            stroke={smaVolume50.stroke()}
+            fill={smaVolume50.fill()}
+          />
+        </Chart>
+        <Chart
+          id={3}
+          height={150}
+          yExtents={macdCalculator.accessor()}
+          origin={(w, h) => [0, h - 150]}
+          padding={{ top: 10, bottom: 10 }}
+        >
+          <XAxis axisAt="bottom" orient="bottom" />
+          <YAxis axisAt="right" orient="right" ticks={2} />
+
+          <MouseCoordinateX
+            at="bottom"
+            orient="bottom"
+            displayFormat={timeFormat("%Y-%m-%d")}
+            rectRadius={5}
+            {...mouseEdgeAppearance}
+          />
+          <MouseCoordinateY
+            at="right"
+            orient="right"
+            displayFormat={format(".2f")}
+            {...mouseEdgeAppearance}
+          />
+
+          <MACDSeries yAccessor={(d) => d.macd} {...macdAppearance} />
+          <MACDTooltip
+            origin={[-38, 15]}
+            yAccessor={(d) => d.macd}
+            options={macdCalculator.options()}
+            appearance={macdAppearance}
+          />
+        </Chart>
+        <CrossHairCursor />
+      </ChartCanvas>
     );
   }
 }
 
-export default CandlestickChart;
+CandleStickChartWithMACDIndicator.propTypes = {
+  data: PropTypes.array.isRequired,
+  width: PropTypes.number.isRequired,
+  ratio: PropTypes.number.isRequired,
+  type: PropTypes.oneOf(["svg", "hybrid"]).isRequired,
+};
+
+CandleStickChartWithMACDIndicator.defaultProps = {
+  type: "svg",
+};
+
+CandleStickChartWithMACDIndicator = fitWidth(CandleStickChartWithMACDIndicator);
+
+export default CandleStickChartWithMACDIndicator;

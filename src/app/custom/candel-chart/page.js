@@ -1,101 +1,56 @@
 "use client";
-
-import React from "react";
-import { render } from "react-dom";
-// import Chart from "./Chart";
-// import { getData } from "./utils";
-
+import React, { useState, useEffect } from "react";
 import { TypeChooser } from "react-stockcharts/lib/helper";
 import { getData } from "@/utils/getData";
 import CandleStickChartWithCHMousePointer from "@/components/Chart";
+import CandleStickChartWithBollingerBandOverlay from "@/components/CandlestickChart";
 
-class ChartComponent extends React.Component {
-  componentDidMount() {
-    getData().then((data) => {
-      this.setState({ data });
+function ChartComponent() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    getData().then((fetchedData) => {
+      setData(fetchedData);
     });
+  }, []); // Empty dependency array ensures this effect runs only once when the component mounts
+
+  if (data === null) {
+    return <div>Loading...</div>;
   }
-  render() {
-    if (this.state == null) {
-      return <div>Loading...</div>;
-    }
-    return (
-      <div
-        style={{
-          display: "flex",
-          width: "100%",
-          flexWrap: "wrap",
-          alignItems: "center",
-          justifyContent: "space-around",
-        }}
-      >
-        <TypeChooser>
-          {(type) => (
-            <CandleStickChartWithCHMousePointer
-              type={type}
-              data={this.state.data}
-            />
-          )}
-        </TypeChooser>
-        <TypeChooser>
-          {(type) => (
-            <CandleStickChartWithCHMousePointer
-              type={type}
-              data={this.state.data}
-            />
-          )}
-        </TypeChooser>
-        <TypeChooser>
-          {(type) => (
-            <CandleStickChartWithCHMousePointer
-              type={type}
-              data={this.state.data}
-            />
-          )}
-        </TypeChooser>
-        <TypeChooser>
-          {(type) => (
-            <CandleStickChartWithCHMousePointer
-              type={type}
-              data={this.state.data}
-            />
-          )}
-        </TypeChooser>
-        <TypeChooser>
-          {(type) => (
-            <CandleStickChartWithCHMousePointer
-              type={type}
-              data={this.state.data}
-            />
-          )}
-        </TypeChooser>
-        <TypeChooser>
-          {(type) => (
-            <CandleStickChartWithCHMousePointer
-              type={type}
-              data={this.state.data}
-            />
-          )}
-        </TypeChooser>
-        <TypeChooser>
-          {(type) => (
-            <CandleStickChartWithCHMousePointer
-              type={type}
-              data={this.state.data}
-            />
-          )}
-        </TypeChooser>
-        <TypeChooser>
-          {(type) => (
-            <CandleStickChartWithCHMousePointer
-              type={type}
-              data={this.state.data}
-            />
-          )}
-        </TypeChooser>
-      </div>
-    );
-  }
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        width: "100%",
+        flexWrap: "wrap",
+        alignItems: "center",
+        justifyContent: "space-around",
+      }}
+    >
+      <CandleStickChartWithCHMousePointer
+        type={"svg"}
+        data={data}
+        width={window.innerWidth}
+        height={window.innerHeight - 100}
+      />
+      {/* <CandleStickChartWithCHMousePointer
+        type={"svg"}
+        data={data}
+        width={window.innerWidth / 2 - 20}
+        height={window.innerHeight / 2}
+      /> */}
+      {/* <CandleStickChartWithBollingerBandOverlay
+        type={"svg"}
+        data={data}
+        width={1000}
+      /> */}
+      {/* <TypeChooser>
+        {(type) => (
+        )}
+      </TypeChooser> */}
+    </div>
+  );
 }
 
 export default ChartComponent;
