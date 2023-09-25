@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/icons": "^5.2.6",
+    "antd": "^5.9.2",
     "d3-dsv": "^3.0.1",
     "d3-format": "^3.1.0",
     "d3-scale": "^4.0.2",

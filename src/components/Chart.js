@@ -66,6 +66,7 @@ class CandleStickChartWithCHMousePointer extends React.Component {
       height,
       emaConfig = defaltEmaConfig,
       smaConfig = defaltSmaConfig,
+      enableIndicators,
     } = this.props;
     const emaIndicator = ema()
       .options({
@@ -122,18 +123,17 @@ class CandleStickChartWithCHMousePointer extends React.Component {
     return (
       <div
         style={{
-          border: "1px solid red",
+          border: "1px solid lightGreen",
         }}
       >
-        <ChartHeader />
         <ChartCanvas
           mouseMoveEvent={true}
           panEvent={true}
           zoomEvent={true}
           clamp={true}
-          height={height}
+          height={height - 30}
           ratio={ratio}
-          width={width}
+          width={width - 20}
           // margin={{ left: 70, right: 70, top: 10, bottom: 30 }}
           type={type}
           seriesName="MSFT"
@@ -152,6 +152,7 @@ class CandleStickChartWithCHMousePointer extends React.Component {
               smaIndicator.accessor(),
               bb.accessor(),
             ]}
+            origin={(w, h) => [0, 0]}
           >
             <XAxis axisAt="bottom" orient="bottom" />
             <YAxis axisAt="right" orient="right" ticks={10} />
@@ -160,148 +161,187 @@ class CandleStickChartWithCHMousePointer extends React.Component {
               orient="right"
               displayFormat={format(".2f")}
             />
-            <CandlestickSeries
-              fill={(d) => (d.close > d.open ? "#ff0000" : "#158d01")}
-              stroke={(d) => (d.close > d.open ? "#ff0000" : "#158d01")}
-              wickStroke={(d) => (d.close > d.open ? "#ff0000" : "#158d01")}
-              opacity={1}
-            />
-            <BollingerSeries
-              yAccessor={(d) => d.bb}
-              stroke={bbStroke}
-              fill={bbFill}
-            />
-            <LineSeries
-              yAccessor={emaIndicator.accessor()}
-              stroke={emaIndicator.stroke()}
-            />
-            <LineSeries
-              yAccessor={smaIndicator.accessor()}
-              stroke={smaIndicator.stroke()}
-            />
-            <CurrentCoordinate
-              yAccessor={emaIndicator.accessor()}
-              fill={emaIndicator.stroke()}
-            />
-            <CurrentCoordinate
-              yAccessor={smaIndicator.accessor()}
-              fill={smaIndicator.stroke()}
-            />
-            <MovingAverageTooltip
-              onClick={(e) => console.log(e)}
-              origin={[-38, 15]}
-              options={[
-                {
-                  yAccessor: smaIndicator.accessor(),
-                  type: smaIndicator.type(),
-                  stroke: smaIndicator.stroke(),
-                  windowSize: smaIndicator.options().windowSize,
-                },
-                {
-                  yAccessor: emaIndicator.accessor(),
-                  type: emaIndicator.type(),
-                  stroke: emaIndicator.stroke(),
-                  windowSize: emaIndicator.options().windowSize,
-                },
-              ]}
-            />
-            <BollingerBandTooltip
-              origin={[-38, 60]}
-              yAccessor={(d) => d.bb}
-              options={bb.options()}
-            />
+            {enableIndicators.candelstick && (
+              <CandlestickSeries
+                fill={(d) => (d.close > d.open ? "#ff0000" : "#158d01")}
+                stroke={(d) => (d.close > d.open ? "#ff0000" : "#158d01")}
+                wickStroke={(d) => (d.close > d.open ? "#ff0000" : "#158d01")}
+                opacity={1}
+              />
+            )}
+            {enableIndicators.bb && (
+              <>
+                <BollingerSeries
+                  yAccessor={(d) => d.bb}
+                  stroke={bbStroke}
+                  fill={bbFill}
+                />
+                <BollingerBandTooltip
+                  origin={[-38, 60]}
+                  yAccessor={(d) => d.bb}
+                  options={bb.options()}
+                />
+              </>
+            )}
+            {console.log({ enableIndicators })}
+            {/* Ema */}
+            {enableIndicators.ema && (
+              <>
+                <LineSeries
+                  yAccessor={emaIndicator.accessor()}
+                  stroke={emaIndicator.stroke()}
+                />
+                <CurrentCoordinate
+                  yAccessor={emaIndicator.accessor()}
+                  fill={emaIndicator.stroke()}
+                />
+              </>
+            )}
+
+            {/* Sma */}
+            {enableIndicators.sma && (
+              <>
+                <LineSeries
+                  yAccessor={smaIndicator.accessor()}
+                  stroke={smaIndicator.stroke()}
+                />
+                <CurrentCoordinate
+                  yAccessor={smaIndicator.accessor()}
+                  fill={smaIndicator.stroke()}
+                />
+              </>
+            )}
+
+            {/* Moveing Avarage */}
+            {enableIndicators.movingaveragetooltip && (
+              <MovingAverageTooltip
+                onClick={(e) => console.log(e)}
+                origin={[-38, 15]}
+                options={[
+                  {
+                    yAccessor: smaIndicator.accessor(),
+                    type: smaIndicator.type(),
+                    stroke: smaIndicator.stroke(),
+                    windowSize: smaIndicator.options().windowSize,
+                  },
+                  {
+                    yAccessor: emaIndicator.accessor(),
+                    type: emaIndicator.type(),
+                    stroke: emaIndicator.stroke(),
+                    windowSize: emaIndicator.options().windowSize,
+                  },
+                ]}
+              />
+            )}
+
             <OHLCTooltip forChart={1} origin={[-40, 0]} />
           </Chart>
-          <Chart
-            id={2}
-            height={150}
-            yExtents={(d) => d.volume}
-            origin={(w, h) => [0, h - 411]}
-          >
-            <YAxis
-              axisAt="left"
-              orient="left"
-              ticks={5}
-              tickFormat={format(".2s")}
-            />
 
-            <MouseCoordinateX
-              at="bottom"
-              orient="bottom"
-              displayFormat={timeFormat("%Y-%m-%d")}
-            />
-            <MouseCoordinateY
-              at="left"
-              orient="left"
-              displayFormat={format(".4s")}
-            />
+          {/* Bar seares */}
+          {enableIndicators.barseries && (
+            <Chart
+              id={2}
+              height={height / 2}
+              yExtents={(d) => d.volume}
+              origin={(w, h) => [0, 0]}
+            >
+              <YAxis
+                axisAt="left"
+                orient="left"
+                ticks={5}
+                tickFormat={format(".2s")}
+              />
 
-            <BarSeries
-              yAccessor={(d) => d.volume}
-              fill={(d) => (d.close > d.open ? "#ff0000" : "#158d01")}
-              stroke={(d) => (d.close > d.open ? "#ff0000" : "#158d01")}
-              // wickStroke={(d) => (d.close > d.open ? "#ff0000" : "#158d01")}
-              // opacity={1}
-            />
-          </Chart>
-          <Chart
-            id={3}
-            yExtents={[0, 100]}
-            height={125}
-            origin={(w, h) => [0, h - 250]}
-          >
-            <XAxis
-              axisAt="bottom"
-              orient="bottom"
-              showTicks={false}
-              outerTickSize={0}
-            />
-            <YAxis axisAt="right" orient="right" tickValues={[30, 50, 70]} />
-            <MouseCoordinateY
-              at="right"
-              orient="right"
-              displayFormat={format(".2f")}
-            />
+              <MouseCoordinateX
+                at="bottom"
+                orient="bottom"
+                displayFormat={timeFormat("%Y-%m-%d")}
+              />
+              <MouseCoordinateY
+                at="left"
+                orient="left"
+                displayFormat={format(".4s")}
+              />
 
-            <RSISeries yAccessor={(d) => d.rsi} />
+              <BarSeries
+                yAccessor={(d) => d.volume}
+                fill={(d) => (d.close > d.open ? "#ff0000" : "#158d01")}
+                stroke={(d) => (d.close > d.open ? "#ff0000" : "#158d01")}
+                // wickStroke={(d) => (d.close > d.open ? "#ff0000" : "#158d01")}
+                // opacity={1}
+              />
+            </Chart>
+          )}
 
-            <RSITooltip
-              origin={[-38, 15]}
-              yAccessor={(d) => d.rsi}
-              options={rsiCalculator.options()}
-            />
-          </Chart>
-          <Chart
-            id={8}
-            yExtents={atr14.accessor()}
-            height={125}
-            origin={(w, h) => [0, h - 125]}
-            padding={{ top: 10, bottom: 10 }}
-          >
-            <XAxis axisAt="bottom" orient="bottom" />
-            <YAxis axisAt="right" orient="right" ticks={2} />
+          {/* Rsi */}
+          {enableIndicators.rsi && (
+            <Chart
+              id={3}
+              yExtents={[0, 100]}
+              height={height / 6}
+              origin={(w, h) => [0, height / 2]}
+            >
+              <XAxis
+                axisAt="bottom"
+                orient="bottom"
+                showTicks={false}
+                outerTickSize={0}
+              />
+              <YAxis axisAt="right" orient="right" tickValues={[30, 50, 70]} />
+              <MouseCoordinateY
+                at="right"
+                orient="right"
+                displayFormat={format(".2f")}
+              />
 
-            <MouseCoordinateX
-              at="bottom"
-              orient="bottom"
-              displayFormat={timeFormat("%Y-%m-%d")}
-            />
-            <MouseCoordinateY
-              at="right"
-              orient="right"
-              displayFormat={format(".2f")}
-            />
+              <RSISeries yAccessor={(d) => d.rsi} />
 
-            <LineSeries yAccessor={atr14.accessor()} stroke={atr14.stroke()} />
-            <SingleValueTooltip
-              yAccessor={atr14.accessor()}
-              yLabel={`ATR (${atr14.options().windowSize})`}
-              yDisplayFormat={format(".2f")}
-              /* valueStroke={atr14.stroke()} - optional prop */
-              /* labelStroke="#4682B4" - optional prop */
-              origin={[-40, 15]}
-            />
-          </Chart>
+              <RSITooltip
+                origin={[-38, 15]}
+                yAccessor={(d) => d.rsi}
+                options={rsiCalculator.options()}
+              />
+            </Chart>
+          )}
+
+          {/* Atr */}
+          {enableIndicators.atr && (
+            <Chart
+              id={8}
+              yExtents={atr14.accessor()}
+              height={125}
+              origin={(w, h) => [0, h - 125]}
+              padding={{ top: 10, bottom: 10 }}
+            >
+              <XAxis axisAt="bottom" orient="bottom" />
+              <YAxis axisAt="right" orient="right" ticks={2} />
+
+              <MouseCoordinateX
+                at="bottom"
+                orient="bottom"
+                displayFormat={timeFormat("%Y-%m-%d")}
+              />
+              <MouseCoordinateY
+                at="right"
+                orient="right"
+                displayFormat={format(".2f")}
+              />
+
+              <LineSeries
+                yAccessor={atr14.accessor()}
+                stroke={atr14.stroke()}
+              />
+              <SingleValueTooltip
+                yAccessor={atr14.accessor()}
+                yLabel={`ATR (${atr14.options().windowSize})`}
+                yDisplayFormat={format(".2f")}
+                /* valueStroke={atr14.stroke()} - optional prop */
+                /* labelStroke="#4682B4" - optional prop */
+                origin={[-40, 15]}
+              />
+            </Chart>
+          )}
+
           <CrossHairCursor />
         </ChartCanvas>
       </div>
