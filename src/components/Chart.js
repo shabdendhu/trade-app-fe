@@ -144,7 +144,18 @@ class CandleStickChartWithCHMousePointer extends React.Component {
           xExtents={xExtents}
         >
           <Chart
-            height={height / 2}
+            yExtents={[
+              (d) => [d.high, d.low],
+              emaIndicator.accessor(),
+              smaIndicator.accessor(),
+              bb.accessor(),
+            ]}
+            height={height - 80}
+          >
+            <XAxis axisAt="bottom" orient="bottom" />
+          </Chart>
+          <Chart
+            height={height / 3}
             id={1}
             yExtents={[
               (d) => [d.high, d.low],
@@ -154,13 +165,13 @@ class CandleStickChartWithCHMousePointer extends React.Component {
             ]}
             origin={(w, h) => [0, 0]}
           >
-            <XAxis axisAt="bottom" orient="bottom" />
-            <YAxis axisAt="right" orient="right" ticks={10} />
             <MouseCoordinateY
               at="right"
               orient="right"
               displayFormat={format(".2f")}
             />
+            <YAxis axisAt="right" orient="right" ticks={10} />
+
             {enableIndicators.candelstick && (
               <CandlestickSeries
                 fill={(d) => (d.close > d.open ? "#ff0000" : "#158d01")}
@@ -241,16 +252,17 @@ class CandleStickChartWithCHMousePointer extends React.Component {
           {enableIndicators.barseries && (
             <Chart
               id={2}
-              height={height / 2}
+              height={height / 3}
               yExtents={(d) => d.volume}
+              // width={width}
               origin={(w, h) => [0, 0]}
             >
-              <YAxis
+              {/* <YAxis
                 axisAt="left"
                 orient="left"
                 ticks={5}
                 tickFormat={format(".2s")}
-              />
+              /> */}
 
               <MouseCoordinateX
                 at="bottom"
@@ -278,16 +290,17 @@ class CandleStickChartWithCHMousePointer extends React.Component {
             <Chart
               id={3}
               yExtents={[0, 100]}
-              height={height / 6}
-              origin={(w, h) => [0, height / 2]}
+              height={height / 5}
+              origin={(w, h) => [0, height / 3]}
             >
               <XAxis
                 axisAt="bottom"
                 orient="bottom"
                 showTicks={false}
                 outerTickSize={0}
+                stroke={"#bfbebe"}
               />
-              <YAxis axisAt="right" orient="right" tickValues={[30, 50, 70]} />
+              <YAxis axisAt="right" orient="right" ticks={4} />
               <MouseCoordinateY
                 at="right"
                 orient="right"
@@ -309,11 +322,11 @@ class CandleStickChartWithCHMousePointer extends React.Component {
             <Chart
               id={8}
               yExtents={atr14.accessor()}
-              height={125}
-              origin={(w, h) => [0, h - 125]}
+              height={height / 5}
+              origin={(w, h) => [0, height / 3 + height / 5]}
               padding={{ top: 10, bottom: 10 }}
             >
-              <XAxis axisAt="bottom" orient="bottom" />
+              {/* <XAxis axisAt="bottom" orient="bottom" /> */}
               <YAxis axisAt="right" orient="right" ticks={2} />
 
               <MouseCoordinateX
