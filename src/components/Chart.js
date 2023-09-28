@@ -113,11 +113,11 @@ let CandleStickChartWithCHMousePointer = ({
     .accessor((d) => d.atr14);
 
   const calculatedData = emaIndicator(
-    smaIndicator(bb(rsiCalculator(atr14(initialData))))
+    smaIndicator(bb(rsiCalculator(atr14(initialData)))),
   );
 
   const xScaleProvider = discontinuousTimeScaleProvider.inputDateAccessor(
-    (d) => d.date
+    (d) => d.date,
   );
   const { data, xScale, xAccessor, displayXAccessor } =
     xScaleProvider(calculatedData);
@@ -127,20 +127,31 @@ let CandleStickChartWithCHMousePointer = ({
   const xExtents = [start, end];
   useEffect(() => {
     console.log({ enableIndicators });
-    if (enableIndicators.atr)
+    if (enableIndicators.atr && enableIndicators.rsi) {
       setDimentions((e) => ({
         ...e,
-        candel: realHeight / 2,
-        bar: realHeight / 2,
-        atr: realHeight / 2,
-        atrOrigin: realHeight / 2,
+        candel: realHeight / 3,
+        bar: realHeight / 3,
+        atr: realHeight / 3,
+        atrOrigin: 2 * (realHeight / 3) - 50,
+        rsi: realHeight / 3,
       }));
-    if (enableIndicators.rsi)
-      setDimentions((e) => ({
-        ...e,
-        candel: realHeight / 2,
-        bar: realHeight / 2,
-      }));
+    } else {
+      if (enableIndicators.atr)
+        setDimentions((e) => ({
+          ...e,
+          candel: realHeight / 2,
+          bar: realHeight / 2,
+          atr: realHeight / 3,
+          atrOrigin: realHeight / 2,
+        }));
+      if (enableIndicators.rsi)
+        setDimentions((e) => ({
+          ...e,
+          candel: realHeight / 2,
+          bar: realHeight / 2,
+        }));
+    }
   }, [enableIndicators]);
 
   return (
@@ -392,7 +403,7 @@ CandleStickChartWithCHMousePointer.defaultProps = {
   type: "svg",
 };
 CandleStickChartWithCHMousePointer = fitWidth(
-  CandleStickChartWithCHMousePointer
+  CandleStickChartWithCHMousePointer,
 );
 
 export default CandleStickChartWithCHMousePointer;
