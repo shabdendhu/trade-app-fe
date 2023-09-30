@@ -285,10 +285,7 @@ let CandleStickChartWithCHMousePointer = ({
           <Chart
             id={2}
             height={dimentions.bar}
-            yExtents={(d) => {
-              console.log(d.volume);
-              return d.volume;
-            }}
+            yExtents={(d) => d.volume}
             // width={width}
             origin={(w, h) => [0, 0]}
           >

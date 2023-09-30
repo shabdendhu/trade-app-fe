@@ -5,6 +5,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, Input } from "antd";
 import axios from "axios";
 import { useSearchParams } from "next/navigation";
+import UpstoxClient, { LoginApi } from "upstox-js-sdk";
 
 class UpstoxLogin extends React.Component {
   constructor(props) {
@@ -53,6 +54,7 @@ const GlobalSettings = () => {
   };
 
   const handleClickAuth = (code) => {
+    console.log(code);
     axios.post("/api", { code }).then((res) => {
       console.log(res);
     });
@@ -60,11 +62,31 @@ const GlobalSettings = () => {
   useEffect(() => {
     console.log("====================================");
     if (router.has("code")) {
-      console.log(router.has("code"));
-      handleClickAuth(router.get("code"));
+      // console.log(router.get("code"));
+      // handleClickAuth(router.get("code"));
+
+      let apiInstance = new LoginApi();
+      let clientId = "955319ac-7b6f-4565-9556-e5eb30685d9d"; // String |
+      let redirectUri = "https://trade-app-fe.vercel.app/custom/candel-chart"; // String |
+      let apiVersion = "2.0"; // String | API Version Header
+      let opts = {
+        // state: "state_example", // String |
+        scope: "authorization_code", // String |
+      };
+      apiInstance.authorize(
+        clientId,
+        redirectUri,
+        apiVersion,
+        opts,
+        (error, data, response) => {
+          if (error) {
+            console.error(error);
+          } else {
+            console.log("API called successfully.", data, response);
+          }
+        }
+      );
     }
-    console.log(router.get("code"));
-    console.log("====================================");
   }, []);
   return (
     <>
@@ -99,7 +121,7 @@ const GlobalSettings = () => {
       >
         <Input onChange={handleChange} placeholder="Chart Window Count" />
         <UpstoxLogin />
-        <button onClick={handleClickAuth}>jke</button>
+        <button>jke</button>
       </Modal>
     </>
   );
