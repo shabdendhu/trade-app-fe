@@ -227,7 +227,6 @@ let CandleStickChartWithCHMousePointer = ({
               />
             </>
           )}
-          {console.log({ enableIndicators })}
           {/* Ema */}
           {enableIndicators.ema && (
             <>
