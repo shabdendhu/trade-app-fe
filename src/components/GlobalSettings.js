@@ -76,6 +76,7 @@ const GlobalSettings = () => {
             "Content-Type": "application/x-www-form-urlencoded",
             "Api-Version": "2.0",
             Accept: "application/json",
+            "Access-Control-Allow-Origin": "*",
           },
         }
       )
