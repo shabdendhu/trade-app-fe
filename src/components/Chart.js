@@ -113,11 +113,11 @@ let CandleStickChartWithCHMousePointer = ({
     .accessor((d) => d.atr14);
 
   const calculatedData = emaIndicator(
-    smaIndicator(bb(rsiCalculator(atr14(initialData)))),
+    smaIndicator(bb(rsiCalculator(atr14(initialData))))
   );
 
   const xScaleProvider = discontinuousTimeScaleProvider.inputDateAccessor(
-    (d) => d.date,
+    (d) => d.date
   );
   const { data, xScale, xAccessor, displayXAccessor } =
     xScaleProvider(calculatedData);
@@ -128,14 +128,13 @@ let CandleStickChartWithCHMousePointer = ({
   useEffect(() => {
     console.log({ enableIndicators });
     if (enableIndicators.atr && enableIndicators.rsi) {
-      setDimentions((e) => ({
-        ...e,
+      setDimentions({
         candel: realHeight / 3,
         bar: realHeight / 3,
         atr: realHeight / 3,
         atrOrigin: 2 * (realHeight / 3) - 50,
         rsi: realHeight / 3,
-      }));
+      });
     } else {
       if (enableIndicators.atr)
         setDimentions((e) => ({
@@ -184,7 +183,7 @@ let CandleStickChartWithCHMousePointer = ({
             smaIndicator.accessor(),
             bb.accessor(),
           ]}
-          height={realHeight - 80}
+          height={realHeight - 50}
         >
           <XAxis axisAt="bottom" orient="bottom" />
         </Chart>
@@ -287,7 +286,10 @@ let CandleStickChartWithCHMousePointer = ({
           <Chart
             id={2}
             height={dimentions.bar}
-            yExtents={(d) => d.volume}
+            yExtents={(d) => {
+              console.log(d.volume);
+              return d.volume;
+            }}
             // width={width}
             origin={(w, h) => [0, 0]}
           >
@@ -403,7 +405,7 @@ CandleStickChartWithCHMousePointer.defaultProps = {
   type: "svg",
 };
 CandleStickChartWithCHMousePointer = fitWidth(
-  CandleStickChartWithCHMousePointer,
+  CandleStickChartWithCHMousePointer
 );
 
 export default CandleStickChartWithCHMousePointer;

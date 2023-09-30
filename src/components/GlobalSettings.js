@@ -1,6 +1,7 @@
 import { SettingOutlined } from "@ant-design/icons";
 import React, { useState } from "react";
 import { Modal, Input } from "antd";
+import axios from "axios";
 const GlobalSettings = () => {
   const [openGlobalSettingModal, setOpenGlobalSettingModal] = useState(false);
   const [chartWindow, setChartWindow] = useState(1);
@@ -12,6 +13,15 @@ const GlobalSettings = () => {
   };
   const handleCloseGlobalSettingModal = () => {
     setOpenGlobalSettingModal(false);
+  };
+  const handleClickAuth = () => {
+    axios
+      .get(
+        "https://api-v2.upstox.com/login/authorization/dialog?response_type=code&client_id=955319ac-7b6f-4565-9556-e5eb30685d9d&redirect_uri=https://trade-app-fe.vercel.app/custom/candel-chart&state=RnJpIERlYyAxNiAyMDIyIDE1OjU4OjUxIEdNVCswNTMwIChJbmRpYSBTdGFuZGFyZCBUaW1lKQ%3D%3D."
+      )
+      .then((e) => {
+        console.log(e);
+      });
   };
   return (
     <>
@@ -45,6 +55,7 @@ const GlobalSettings = () => {
         onCancel={handleCloseGlobalSettingModal}
       >
         <Input onChange={handleChange} placeholder="Chart Window Count" />
+        <button onClick={handleClickAuth}>wefljn</button>
       </Modal>
     </>
   );
