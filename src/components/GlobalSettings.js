@@ -55,37 +55,39 @@ const GlobalSettings = () => {
 
   const handleClickAuth = (code) => {
     console.log(code);
-    axios.post("/api", { code }).then((res) => {
-      console.log(res);
-    });
+    // axios.post("/api", { code }).then((res) => {
+    //   console.log(res);
+
+    // }).then((e)=>{
+    //   console.log()
+    // });
+    axios
+      .post(
+        "https://api-v2.upstox.com/login/authorization/token",
+        {
+          code,
+          client_id: "955319ac-7b6f-4565-9556-e5eb30685d9d",
+          client_secret: "q068cmks7h",
+          redirect_uri: "https://trade-app-fe.vercel.app/custom/candel-chart",
+          grant_type: "authorization_code",
+        },
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Api-Version": "2.0",
+            Accept: "application/json",
+          },
+        }
+      )
+      .then((e) => {
+        console.log(e, "token");
+      });
   };
   useEffect(() => {
     console.log("====================================");
     if (router.has("code")) {
       // console.log(router.get("code"));
-      // handleClickAuth(router.get("code"));
-
-      let apiInstance = new LoginApi();
-      let clientId = "955319ac-7b6f-4565-9556-e5eb30685d9d"; // String |
-      let redirectUri = "https://trade-app-fe.vercel.app/custom/candel-chart"; // String |
-      let apiVersion = "2.0"; // String | API Version Header
-      let opts = {
-        // state: "state_example", // String |
-        scope: "authorization_code", // String |
-      };
-      apiInstance.authorize(
-        clientId,
-        redirectUri,
-        apiVersion,
-        opts,
-        (error, data, response) => {
-          if (error) {
-            console.error(error);
-          } else {
-            console.log("API called successfully.", data, response);
-          }
-        }
-      );
+      handleClickAuth(router.get("code"));
     }
   }, []);
   return (
