@@ -55,33 +55,13 @@ const GlobalSettings = () => {
 
   const handleClickAuth = (code) => {
     console.log(code);
-    // axios.post("/api", { code }).then((res) => {
-    //   console.log(res);
-
-    // }).then((e)=>{
-    //   console.log()
-    // });
     axios
-      .post(
-        "https://api-v2.upstox.com/login/authorization/token",
-        {
-          code,
-          client_id: "955319ac-7b6f-4565-9556-e5eb30685d9d",
-          client_secret: "q068cmks7h",
-          redirect_uri: "https://trade-app-fe.vercel.app/custom/candel-chart",
-          grant_type: "authorization_code",
-        },
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            "Api-Version": "2.0",
-            Accept: "application/json",
-            "Access-Control-Allow-Origin": "*",
-          },
-        }
-      )
+      .post("/api", { code })
+      .then((res) => {
+        console.log(res);
+      })
       .then((e) => {
-        console.log(e, "token");
+        console.log();
       });
   };
   useEffect(() => {

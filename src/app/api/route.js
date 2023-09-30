@@ -3,11 +3,11 @@
 import axios from "axios";
 import { NextResponse } from "next/server";
 
-export async function POST(req) {
+export async function POST(request) {
   // if (req.method !== "POST") {
   //   return res.status(405).end(); // Method Not Allowed
   // }
-  console.log(req.body);
+  const reqBody = await request.json();
   // Your Upstox API credentials
   const clientId = "955319ac-7b6f-4565-9556-e5eb30685d9d";
   const clientSecret = "q068cmks7h";
@@ -28,7 +28,7 @@ export async function POST(req) {
     const response = await axios.post(
       "https://api-v2.upstox.com/login/authorization/token",
       {
-        code: "vwqnTq",
+        code: reqBody.code,
         client_id: "955319ac-7b6f-4565-9556-e5eb30685d9d",
         client_secret: "q068cmks7h",
         redirect_uri: "https://trade-app-fe.vercel.app/custom/candel-chart",
