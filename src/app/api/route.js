@@ -27,11 +27,22 @@ export async function POST(request) {
     // Make the POST request to Upstox's token endpoint
     const response = await axios.post(
       "https://api-v2.upstox.com/login/authorization/token",
-      requestData,
+      {
+        code: reqBody.code,
+        client_id: "955319ac-7b6f-4565-9556-e5eb30685d9d",
+        client_secret: "q068cmks7h",
+        redirect_uri: "https://trade-app-fe.vercel.app/custom/candel-chart",
+        grant_type: "authorization_code",
+      },
       {
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          // "Content-Type": "application/x-www-form-urlencoded",
           "Api-Version": "2.0",
+          code: reqBody.code,
+          client_id: "955319ac-7b6f-4565-9556-e5eb30685d9d",
+          client_secret: "q068cmks7h",
+          redirect_uri: "https://trade-app-fe.vercel.app/custom/candel-chart",
+          grant_type: "authorization_code",
           Accept: "application/json",
         },
       }
@@ -44,7 +55,7 @@ export async function POST(request) {
     // res.status(200).json({ access_token: accessToken });
     return NextResponse.json({ access_token: accessToken }, { status: 200 });
   } catch (error) {
-    console.error("Error exchanging code for token:", Object.keys(error));
+    console.error("Error exchanging code for token:", error);
     return NextResponse.json({ error: error }, { status: 500 });
   }
 }
