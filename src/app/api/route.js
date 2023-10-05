@@ -32,6 +32,9 @@ export async function POST(request) {
         body: requestData.toString(),
       }
     );
+    console.log("====================================");
+    console.log(response);
+    console.log("====================================");
     // console.log(Object.keys(res));
     // if (!response.ok) {
     //   throw new Error(`HTTP error! Status: ${response}`);
