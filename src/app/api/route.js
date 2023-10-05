@@ -1,6 +1,3 @@
-// import axios from "axios";
-
-import axios from "axios";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
@@ -13,8 +10,6 @@ export async function POST(request) {
   const clientSecret = "q068cmks7h";
   const redirectUri = "https://trade-app-fe.vercel.app/custom/candel-chart";
 
-  const authCode = "vwqnTq";
-
   // Prepare the data for the POST request to Upstox
   const requestData = new URLSearchParams();
   requestData.append("code", reqBody.code);
@@ -24,38 +19,32 @@ export async function POST(request) {
   requestData.append("grant_type", "authorization_code");
 
   try {
-    // Make the POST request to Upstox's token endpoint
-    const response = await axios.post(
+    // Make the POST request to Upstox's token endpoint using the Fetch API
+    const response = await fetch(
       "https://api-v2.upstox.com/login/authorization/token",
       {
-        code: reqBody.code,
-        client_id: "955319ac-7b6f-4565-9556-e5eb30685d9d",
-        client_secret: "q068cmks7h",
-        redirect_uri: "https://trade-app-fe.vercel.app/custom/candel-chart",
-        grant_type: "authorization_code",
-      },
-      {
+        method: "POST",
         headers: {
-          // "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/x-www-form-urlencoded",
           "Api-Version": "2.0",
-          code: reqBody.code,
-          client_id: "955319ac-7b6f-4565-9556-e5eb30685d9d",
-          client_secret: "q068cmks7h",
-          redirect_uri: "https://trade-app-fe.vercel.app/custom/candel-chart",
-          grant_type: "authorization_code",
           Accept: "application/json",
         },
+        body: requestData.toString(),
       }
     );
+    // console.log(Object.keys(res));
+    // if (!response.ok) {
+    //   throw new Error(`HTTP error! Status: ${response}`);
+    // }
 
-    // Store the access token securely or send it back to the client
-    console.log(accessToken);
-    const accessToken = response.data.access_token;
+    // const responseData = await response.json();
+    // const accessToken = responseData.access_token;
 
-    // res.status(200).json({ access_token: accessToken });
-    return NextResponse.json({ access_token: accessToken }, { status: 200 });
+    // console.log(accessToken);
+
+    return NextResponse.json({ access_token: response }, { status: 200 });
   } catch (error) {
     console.error("Error exchanging code for token:", error);
-    return NextResponse.json({ error: error }, { status: 500 });
+    return NextResponse.json({ error }, { status: 500 });
   }
 }
