@@ -1,3 +1,4 @@
+import axios from "axios";
 import { NextResponse } from "next/server";
 
 export async function POST(request) {
@@ -11,25 +12,27 @@ export async function POST(request) {
   const redirectUri = "https://trade-app-fe.vercel.app/custom/candel-chart";
 
   // Prepare the data for the POST request to Upstox
-  const requestData = new URLSearchParams();
+  const requestData = new FormData();
   requestData.append("code", reqBody.code);
   requestData.append("client_id", clientId);
   requestData.append("client_secret", clientSecret);
   requestData.append("redirect_uri", redirectUri);
   requestData.append("grant_type", "authorization_code");
+  console.log("====================================");
+  console.log(requestData);
+  console.log("====================================");
 
   try {
     // Make the POST request to Upstox's token endpoint using the Fetch API
-    const response = await fetch(
+    const response = await axios.post(
       "https://api-v2.upstox.com/login/authorization/token",
+      requestData,
       {
-        method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           "Api-Version": "2.0",
           Accept: "application/json",
         },
-        body: requestData.toString(),
       }
     );
     console.log("====================================");
